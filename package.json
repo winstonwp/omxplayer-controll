@@ -1,0 +1,30 @@
+{
+  "name": "omxplayer-controll",
+  "version": "0.1.0",
+  "description": "omxplayer controll ussing dbus",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/winstonwp/omxplayer-controll.git"
+  },
+  "keywords": [
+    "omx",
+    "omxplayer",
+    "control",
+    "controller",
+    "rpi",
+    "Raspberry",
+    "Pi",
+    "pi",
+    "Raspberry"
+  ],
+  "author": "winstonwp",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/winstonwp/omxplayer-controll/issues"
+  },
+  "homepage": "https://github.com/winstonwp/omxplayer-controll#readme"
+}
