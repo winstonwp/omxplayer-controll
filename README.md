@@ -1,6 +1,6 @@
 # omxplayer-controll
 
-Controll omxplayer (https://github.com/popcornmix/omxplayer) with native dbus (https://github.com/sidorares/node-dbus/)
+Controll [omxplayer] (https://github.com/popcornmix/omxplayer) with [native dbus] (https://github.com/sidorares/node-dbus/)
 
 
 #Installation
