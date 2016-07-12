@@ -1,30 +1,32 @@
 {
   "name": "omxplayer-controll",
   "version": "0.1.0",
-  "description": "omxplayer controll ussing dbus",
+  "description": "Raspberry Pi omxplayer controll using dbus-native",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "make test"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/winstonwp/omxplayer-controll.git"
   },
   "keywords": [
-    "omx",
-    "omxplayer",
-    "control",
-    "controller",
-    "rpi",
     "Raspberry",
-    "Pi",
     "pi",
-    "Raspberry"
+    "omxplayer",
+    "dbus"
   ],
-  "author": "winstonwp",
-  "license": "Apache-2.0",
+  "author": "Winston Wright <winstonwp@gmail.com> (https://github.com/winstonwp/)",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/winstonwp/omxplayer-controll/issues"
   },
-  "homepage": "https://github.com/winstonwp/omxplayer-controll#readme"
+  "homepage": "https://github.com/winstonwp/omxplayer-controll#readme",
+  "dependencies": {
+    "dbus-native": "^0.2.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^2.5.3"
+  }
 }
