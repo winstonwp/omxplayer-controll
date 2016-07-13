@@ -23,18 +23,8 @@ module.exports.playPause = function(cb) { //checked
         return typeof cb === 'function' ? cb(err) : {};
     });
 };
-module.exports.play = function(cb) { //not working
-    omx_dbus.method('Play', function(err) {
-        return typeof cb === 'function' ? cb(err) : {};
-    });
-};
 module.exports.pause = function(cb) { //checked IDEM playPause
     omx_dbus.method('Pause', function(err) {
-        return typeof cb === 'function' ? cb(err) : {};
-    });
-};
-module.exports.quit = function(cb) { //not working
-    omx_dbus.method('Quit', function(err) {
         return typeof cb === 'function' ? cb(err) : {};
     });
 };
@@ -69,17 +59,13 @@ module.exports.getVolume = function(cb) { //checked
         cb(err, vol);
     });
 };
-module.exports.setVolume = function(vol, cb) { //not working
+module.exports.setVolume = function(vol, cb) { //checked *not oficially but Working
     //Working command
-    //dbus-send --print-reply=literal --session --reply-timeout=500 --dest=org.mpris.MediaPlayer2.omxplayer /org/mpris/MediaPlayer2 org.freedesktop.DBus.Properties.Volume double:0.
+    //OMXPLAYER_DBUS_ADDR="/tmp/omxplayerdbus.${USER:-root}";OMXPLAYER_DBUS_PID="/tmp/omxplayerdbus.${USER:-root}.pid";export DBUS_SESSION_BUS_ADDRESS=`cat $OMXPLAYER_DBUS_ADDR`;export DBUS_SESSION_BUS_PID=`cat $OMXPLAYER_DBUS_PID`;dbus-send --print-reply=literal --session --reply-timeout=500 --dest=org.mpris.MediaPlayer2.omxplayer /org/mpris/MediaPlayer2 org.freedesktop.DBus.Properties.Volume double:0.5
     if (vol <= 1.0 && vol >= 0.0) {
-        // omx_dbus.method('Volume', [vol], function(err) {
-        //     return typeof cb === 'function' ? cb(err) : {};
-        // });
-        // omx_dbus.propertyWrite('Volume', [vol], function(err) {
-        //     return typeof cb === 'function' ? cb(err) : {};
-        // });
-        throw new Error('Function not implemented yet...');
+        omx_dbus.setVolume(vol, function(err, resp) {
+            return typeof cb === 'function' ? cb(err, resp) : {};
+        });
     } else {
         return cb(new Error('Volume should be between 0.0 - 1.0'));
     }
@@ -155,23 +141,13 @@ module.exports.getSource = function(cb) { //checked
         cb(err, vol);
     });
 };
-module.exports.mute = function(cb) { //not working
-    omx_dbus.method('Mute', function(err) {
-        cb(err);
-    });
-};
-module.exports.getMinRate = function(cb) { //not working
-    omx_dbus.propertyRead('MinimunRate', function(err, vol) {
+module.exports.getMinRate = function(cb) { //checked
+    omx_dbus.propertyRead('MinimumRate', function(err, vol) {
         cb(err, vol);
     });
 };
-module.exports.getMaxRate = function(cb) { //not working
+module.exports.getMaxRate = function(cb) { //checked
     omx_dbus.propertyRead('MaximumRate', function(err, vol) {
-        cb(err, vol);
-    });
-};
-module.exports.getRate = function(cb) { //not working
-    omx_dbus.propertyRead('Rate', function(err, vol) {
         cb(err, vol);
     });
 };
@@ -185,3 +161,27 @@ module.exports.increaceRate = function(cb) { //checked
         return typeof cb === 'function' ? cb(err) : {};
     });
 };
+
+
+//=========================Not working functions
+// module.exports.quit = function(cb) { //not working
+//     omx_dbus.method('Quit', function(err) {
+//         return typeof cb === 'function' ? cb(err) : {};
+//     });
+// };
+// module.exports.mute = function(cb) { //not working
+//     omx_dbus.method('Mute', function(err) {
+//         cb(err);
+//     });
+// };
+// module.exports.getRate = function(cb) { //not working
+//     omx_dbus.propertyRead('Rate', function(err, vol) {
+//         cb(err, vol);
+//     });
+// };
+// module.exports.play = function(cb) { //not working
+//     omx_dbus.method('Play', function(err) {
+//         return typeof cb === 'function' ? cb(err) : {};
+//     });
+// };
+//=========================EN OF NOT WORKING FUNCTIONS
