@@ -27,7 +27,7 @@ var opts = {
     'startAt': 0, //default: 0
     'startVolume': 0.8 //0.0 ... 1.0 default: 1.0
 };
-omxp.open(['path_to_dir'], opts);
+omxp.open('path_to_file', opts);
 omxp.on('changeStatus',function(status){
     console.log('Status',status);
 });
@@ -40,7 +40,30 @@ omxp.on('aboutToFinish',function(){
 
 
 ### List of available commands
-//TODO
+#### Open single file
+```js
+omxp.open('path_to_file', opts);
+```
+#### Open multiple files
+```js
+omxp.open(['path_to_file1','path_to_file2','path_to_file3'], opts);
+```
+#### Basic commands
+```js
+omxp.playPause(function(err){});
+omxp.pause(function(err){});
+omxp.getStatus(function(err){});
+omxp.getDuration(function(err){});
+omxp.pause(function(err){});
+omxp.pause(function(err){});
+omxp.pause(function(err){});
+omxp.pause(function(err){});
+omxp.pause(function(err){});
+omxp.pause(function(err){});
+omxp.pause(function(err){});
+omxp.pause(function(err){});
+omxp.pause(function(err){});
+```
 
 
 
