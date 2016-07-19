@@ -52,17 +52,41 @@ omxp.open(['path_to_file1','path_to_file2','path_to_file3'], opts);
 ```js
 omxp.playPause(function(err){});
 omxp.pause(function(err){});
-omxp.getStatus(function(err){});
-omxp.getDuration(function(err){});
-omxp.pause(function(err){});
-omxp.pause(function(err){});
-omxp.pause(function(err){});
-omxp.pause(function(err){});
-omxp.pause(function(err){});
-omxp.pause(function(err){});
-omxp.pause(function(err){});
-omxp.pause(function(err){});
-omxp.pause(function(err){});
+omxp.getStatus(function(err, status){}); //Playing, Paused,
+omxp.getDuration(function(err, duration){});
+omxp.getPosition(function(err, position){});
+omxp.setPosition(new_pos, function(err){});
+omxp.seek(offset, function(err){});
+omxp.getVolume(function(err, volume){});
+omxp.setVolume(new_volume, function(err, volume){});
+omxp.volumeUp(function(err){});
+omxp.volumeDown(function(err){});
+omxp.toggleSubtitles(function(err){});
+omxp.hideSubtitles(function(err){});
+omxp.showSubtitles(function(err){});
+omxp.setAlpha(function(err){});
+omxp.setVideoPos(function(err){});
+omxp.setVideoCropPos(function(err){});
+omxp.setAspectMode(function(err){});
+```
+
+#### Other commands
+Change de Alpha of the current window the value must be between 0 and 255
+```js
+omxp.setAlpha(alpha_value, function(err){});
+```
+Set the position of the window, only works in non full screen.
+```js
+omxp.setVideoPos(x1, y1, x2, y2, function(err){});
+```
+Crop the video inside the window.
+```js
+omxp.setVideoCropPos(x1, y1, x2, y2, function(err){});
+```
+Set the aspect mode for the video, must be one of the following:
+   'letterbox', 'fill', 'stretch', 'default'
+```js
+omxp.setAspectMode(aspect, function(err){});
 ```
 
 
