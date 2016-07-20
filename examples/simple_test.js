@@ -1,4 +1,5 @@
 /*eslint no-console: ["error", { allow: ["warn", "error", "log"] }] */
+var fs = require('fs');
 var omxp = require('../index');
 
 var opts = {
@@ -11,21 +12,15 @@ var opts = {
     'startAt': 0,
     'startVolume': 0.8
 };
-omxp.open('/home/pi/test.mp4', opts);
-omxp.on('changeStatus', function(status) {
-    console.log('Status', status);
-});
-omxp.on('aboutToFinish', function() {
-    console.log('YA CASI');
-});
-setTimeout(function() {
-    // omxp.getDuration(function(err, dur) {
-    //     console.log(dur, Math.round(dur / 20000));
-    //     omxp.setPosition(Math.round(dur / 20000), function(err) {
-    //         console.log(err);
-    //         omxp.getPosition(function(err, pos) {
-    //             console.log(pos);
-    //         });
-    //     });
-    // });
-}, 5000);
+var file = '/home/pi/test.mp3';
+if(fs.existsSync(file)){
+    omxp.open(file, opts);
+    omxp.on('changeStatus', function(status) {
+        console.log('Status', status);
+    });
+    omxp.on('aboutToFinish', function() {
+        console.log('About To Finish');
+    });
+}else{
+    console.error(file + ' non existing');
+}
