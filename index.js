@@ -9,6 +9,9 @@ omx_dbus.on('changeStatus', function(status) {
         eventEmitter.emit('aboutToFinish');
     }
 });
+omx_dbus.on('finish', function() {
+    eventEmitter.emit('finish');
+});
 
 /**
  * Open OmxPlayer, with the given parameter
