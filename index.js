@@ -5,7 +5,8 @@ var omx_dbus = require('./lib/omxp_dbus');
 //TODO fix this to make user independent
 omx_dbus.on('changeStatus', function(status) {
     eventEmitter.emit('changeStatus', status);
-    if (status.duration - status.pos < 5000000) {
+    var diff = status.duration - status.pos;
+    if (diff > 2000000 && diff < 7000000){
         eventEmitter.emit('aboutToFinish');
     }
 });
