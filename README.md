@@ -3,14 +3,14 @@
 Controll omxplayer with native dbus
 
 
-#Installation
+## Installation
 
 
 ```shell
 npm install omxplayer-controll [--save]
 ```
 
-#Usage
+## Usage
 
 
 Short example running a video getting the status every 5 seconds and listeing to the aboutToFinis signal
@@ -39,16 +39,13 @@ omxp.on('aboutToFinish',function(){
 #API
 
 
-### List of available commands
-#### Open single file
+## List of available commands
+### Open single file
 ```js
 omxp.open('path_to_file', opts);
 ```
-#### Open multiple files
-```js
-omxp.open(['path_to_file1','path_to_file2','path_to_file3'], opts);
-```
-#### Basic commands
+
+### Basic commands
 ```js
 omxp.playPause(function(err){});
 omxp.pause(function(err){});
@@ -70,7 +67,7 @@ omxp.setVideoCropPos(function(err){});
 omxp.setAspectMode(function(err){});
 ```
 
-#### Other commands
+### Other commands
 Change de Alpha of the current window the value must be between 0 and 255
 ```js
 omxp.setAlpha(alpha_value, function(err){});
@@ -91,7 +88,7 @@ omxp.setAspectMode(aspect, function(err){});
 
 
 
-### Reference:
+## Reference:
    - https://github.com/sidorares/node-dbus/
    - https://github.com/popcornmix/omxplayer
    - https://github.com/diederikfeilzer/node-omx-interface
