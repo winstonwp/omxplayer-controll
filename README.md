@@ -93,3 +93,10 @@ omxp.setAspectMode(aspect, function(err){});
    - https://github.com/popcornmix/omxplayer
    - https://github.com/diederikfeilzer/node-omx-interface
    - https://github.com/alepez/omxdirector
+
+# Issue reporting:
+When reporting an issue please add the following information:
+  - OS version `cat /etc/os-release`
+  - Node version `node --version`
+  - omxplayer-controll version `npm ls | grep omxplayer-controll`
+  - A detailed explanation of the issue and/or output.
