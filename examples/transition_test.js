@@ -1,47 +1,34 @@
 /*eslint no-console: ["error", { allow: ["warn", "error", "log"] }] */
-var EventEmitter = require('events');
-var OmxDBus = require('../lib/omxp_dbus_class'),
-  omxdbus = new OmxDBus(20);
+var omxp = require('../index');
+
+var opts = {
+  'audioOutput': 'hdmi',
+  'blackBackground': false,
+  'disableKeys': true,
+  'disableOnScreenDisplay': true,
+  'disableGhostbox': true,
+  'subtitlePath': '',
+  'startAt': 0,
+  'startVolume': 0.8,
+  'closeOtherPlayers': false, //Should not close other players if max in not exceded
+  'maxPlayerAllowCount': 2
+};
 
 
-console.log(omxdbus instanceof EventEmitter); // true
-console.log(OmxDBus.super_ === EventEmitter); // true
-omxdbus.on('new',function(){
-  console.log('ASDFASDFASDF');
+omxp.on('changeStatus', function(status) {
+  if (status.pos < status.duration/2 && status.pos > 700000){
+    omxp.setPosition((status.duration - 15000000) / 10000);
+  }
+  console.log('Status', JSON.stringify(status));
 });
-omxdbus.on('openPlayer', function(){
-  console.log('qwerasdfqwerasdf');
+omxp.on('aboutToFinish', function() {
+  console.log('========= About To Finish ==========');
+  setTimeout(function () {
+    omxp.open('/home/pi/test2.mp4', opts);
+  }, 2500);
 });
-omxdbus.openPlayer();
-
-
-// var spawn = require('child_process').spawn;
-//
-//
-// var command = 'omxplayer';
-//
-// var path = ['/home/pi/test1.mp4'];
-// var args = path;
-//
-// args.push('-o', 'hdmi');
-// //omxplayer --win "0 0 960 540" --layer 6 --loop  ~/test1.mp4
-//
-// open1();
-// setTimeout(function() {
-//   open2();
-// }, 1000);
-//
-//
-// function open1() {
-//   console.log('Opening 1');
-//   spawn(command, args.concat('--layer', '5', '--alpha', '126')).on('close', function() {
-//     open1();
-//   });
-// }
-//
-// function open2() {
-//   console.log('Opening 2');
-//   spawn(command, args.concat('--layer', '6', '--alpha', '126')).on('close', function() {
-//     open2();
-//   });
-// }
+omxp.on('finish', function() {
+  console.log('============= Finished =============');
+});
+omxp.setTransition(true);
+omxp.open('/home/pi/test1.mp4', opts);

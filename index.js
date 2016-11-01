@@ -1,19 +1,13 @@
 var events = require('events');
 
 var eventEmitter = new events.EventEmitter();
-var omx_dbus = require('./lib/omxp_dbus');
-//TODO fix this to make user independent
-omx_dbus.on('changeStatus', function(status) {
-  eventEmitter.emit('changeStatus', status);
-  var diff = status.duration - status.pos;
-  if (diff > 2000000 && diff < 7000000){
-    eventEmitter.emit('aboutToFinish');
-  }
-});
-omx_dbus.on('finish', function() {
-  eventEmitter.emit('finish');
-});
-
+var OmxDBus = require('./lib/omxp_dbus');
+var omx_index=30;
+var setTransition = false;
+var omxs = {
+  active:undefined,
+  transitioning:undefined
+};
 /**
  * Open OmxPlayer, with the given parameter
  *
@@ -21,14 +15,67 @@ omx_dbus.on('finish', function() {
  * @options {Object} The options available
  */
 module.exports = eventEmitter;
-module.exports.open = omx_dbus.openPlayer;
+module.exports.setTransition = function(setT){
+  setTransition = setT;
+};
+module.exports.open = function(path, options){
+  // omx_index++;
+  omx_index = omx_index < 20 ? 30 : omx_index - 1;
+  if(setTransition){
+    options.layer = omx_index;
+    if(typeof omxs.active === 'undefined'){
+      omxs.active = new OmxDBus(omx_index);
+      omxs.active.openPlayer(path, options);
+      omxs.active.on('changeStatus', function(status) {
+        eventEmitter.emit('changeStatus', status);
+        var diff = status.duration - status.pos;
+        if (diff > 2000000 && diff < 7000000){
+          eventEmitter.emit('aboutToFinish');
+        }
+      });
+      omxs.active.on('finish', function() {
+        eventEmitter.emit('finish');
+        if(setTransition){
+          omxs.transitioning.method('SetAlpha', ['/not/used', 255], function() {});
+          delete omxs.active;
+          omxs.active = omxs.transitioning;
+        }
+      });
+    }else{
+      omxs.transitioning = new OmxDBus(omx_index);
+      omxs.transitioning.openPlayer(path, options);
+      omxs.active.method('SetAlpha', ['/not/used', 255/2], function() {});
+      omxs.transitioning.method('SetAlpha', ['/not/used', 255/2], function() {});
+      omxs.transitioning.on('changeStatus', function(status) {
+        eventEmitter.emit('changeStatus', status);
+        var diff = status.duration - status.pos;
+        if (diff > 2000000 && diff < 7000000){
+          eventEmitter.emit('aboutToFinish');
+        }
+      });
+      omxs.transitioning.on('finish', function() {
+        eventEmitter.emit('finish');
+        if(setTransition){
+          omxs.transitioning.method('SetAlpha', ['/not/used', 255], function() {});
+          delete omxs.active;
+          omxs.active = omxs.transitioning;
+        }
+      });
+    }
+  } else {
+    if(typeof omxs.active === 'undefined'){
+      omxs.active = new OmxDBus(omx_index);
+    }
+    omxs.active.openPlayer(path, options);
+  }
+};
 module.exports.playPause = function(cb) { //checked
-  omx_dbus.method('PlayPause', function(err) {
+  omxs.active.method('PlayPause', function(err) {
     return typeof cb === 'function' ? cb(err) : {};
   });
 };
 module.exports.pause = function(cb) { //checked IDEM playPause
-  omx_dbus.method('Pause', function(err) {
+  omxs.active.method('Pause', function(err) {
     return typeof cb === 'function' ? cb(err) : {};
   });
 };
@@ -43,28 +90,28 @@ module.exports.stop = function(cb) { //checked IDEM Stop
     });
 };
 module.exports.getStatus = function(cb) { //checked
-  omx_dbus.propertyRead('PlaybackStatus', function(err, status) {
+  omxs.active.propertyRead('PlaybackStatus', function(err, status) {
     cb(err, status);
   });
 };
 module.exports.getDuration = function(cb) { //checked
-  omx_dbus.propertyRead('Duration', function(err, status) {
+  omxs.active.propertyRead('Duration', function(err, status) {
     cb(err, status);
   });
 };
 module.exports.getPosition = function(cb) { //checked
-  omx_dbus.propertyRead('Position', function(err, pos) {
+  omxs.active.propertyRead('Position', function(err, pos) {
     cb(err, Math.round(pos / 10000));
   });
 };
 module.exports.setPosition = function(pos, cb) { //checked
   pos = pos * 10000;
-  omx_dbus.method('SetPosition', ['/not/used', pos], function(err) {
+  omxs.active.method('SetPosition', ['/not/used', pos], function(err) {
     return typeof cb === 'function' ? cb(err) : {};
   });
 };
 module.exports.seek = function(offset, cb) { //checked
-  omx_dbus.method('Seek', [offset], function(err) {
+  omxs.active.method('Seek', [offset], function(err) {
     return typeof cb === 'function' ? cb(err) : {};
   });
 };
@@ -109,13 +156,13 @@ module.exports.getVolume = function(cb) { //checked
     });
 };
 module.exports.getVolume = function(cb) { //checked
-  omx_dbus.propertyRead('Volume', function(err, vol) {
+  omxs.active.propertyRead('Volume', function(err, vol) {
     cb(err, vol);
   });
 };
 module.exports.setVolume = function(vol, cb) { //checked *not oficially but Working
   if (vol <= 1.0 && vol >= 0.0) {
-    omx_dbus.setVolume(vol, function(err, resp) {
+    omxs.active.setVolume(vol, function(err, resp) {
       return typeof cb === 'function' ? cb(err, resp) : {};
     });
   } else {
@@ -123,12 +170,12 @@ module.exports.setVolume = function(vol, cb) { //checked *not oficially but Work
   }
 };
 module.exports.volumeUp = function(cb) { //checked
-  omx_dbus.method('Action', [18], function(err) {
+  omxs.active.method('Action', [18], function(err) {
     return typeof cb === 'function' ? cb(err) : {};
   });
 };
 module.exports.volumeDown = function(cb) { //checked
-  omx_dbus.method('Action', [17], function(err) {
+  omxs.active.method('Action', [17], function(err) {
     return typeof cb === 'function' ? cb(err) : {};
   });
 };
@@ -143,7 +190,7 @@ module.exports.listSubtitles = function(cb) { //checked
     });
 };
 module.exports.toggleSubtitles = function(cb) { //checked not tested (I have no subtitles)
-  omx_dbus.method('Action', [12], function(err) {
+  omxs.active.method('Action', [12], function(err) {
     return typeof cb === 'function' ? cb(err) : {};
   });
 };
@@ -170,18 +217,18 @@ module.exports.previousSubtitle = function(cb) { //checked
     });
 };
 module.exports.hideSubtitles = function(cb) { //checked not tested (I have no subtitles)
-  omx_dbus.method('Action', [30], function(err) {
+  omxs.active.method('Action', [30], function(err) {
     return typeof cb === 'function' ? cb(err) : {};
   });
 };
 module.exports.showSubtitles = function(cb) { //checked not tested (I have no subtitles)
-  omx_dbus.method('Action', [31], function(err) {
+  omxs.active.method('Action', [31], function(err) {
     return typeof cb === 'function' ? cb(err) : {};
   });
 };
 module.exports.setAlpha = function(alpha, cb) { //checked
   if (alpha >= 0 && alpha <= 255) {
-    omx_dbus.method('SetAlpha', ['/not/used', alpha], function(err) {
+    omxs.active.method('SetAlpha', ['/not/used', alpha], function(err) {
       return typeof cb === 'function' ? cb(err) : {};
     });
   } else {
@@ -190,20 +237,20 @@ module.exports.setAlpha = function(alpha, cb) { //checked
 };
 module.exports.setVideoPos = function(x1, y1, x2, y2, cb) { //checked
   var vidPos = x1.toString() + ' ' + y1.toString() + ' ' + x2.toString() + ' ' + y2.toString();
-  omx_dbus.method('VideoPos', ['/not/used', vidPos], function(err) {
+  omxs.active.method('VideoPos', ['/not/used', vidPos], function(err) {
     return typeof cb === 'function' ? cb(err) : {};
   });
 };
 module.exports.setVideoCropPos = function(x1, y1, x2, y2, cb) { //checked
   var vidPos = x1.toString() + ' ' + y1.toString() + ' ' + x2.toString() + ' ' + y2.toString();
-  omx_dbus.method('SetVideoCropPos', ['/not/used', vidPos], function(err) {
+  omxs.active.method('SetVideoCropPos', ['/not/used', vidPos], function(err) {
     return typeof cb === 'function' ? cb(err) : {};
   });
 };
 module.exports.setAspectMode = function(aspect, cb) { //checked
   var available_aspects = ['letterbox', 'fill', 'stretch', 'default'];
   if (available_aspects.indexOf(aspect) > -1) {
-    omx_dbus.method('SetAspectMode', ['/not/used', aspect], function(err) {
+    omxs.active.method('SetAspectMode', ['/not/used', aspect], function(err) {
       return typeof cb === 'function' ? cb(err) : {};
     });
   } else {
@@ -211,37 +258,37 @@ module.exports.setAspectMode = function(aspect, cb) { //checked
   }
 };
 module.exports.hideVideo = function(cb) { //checked
-  omx_dbus.method('Action', [28], function(err) {
+  omxs.active.method('Action', [28], function(err) {
     return typeof cb === 'function' ? cb(err) : {};
   });
 };
 module.exports.unhideVideo = function(cb) { //checked
-  omx_dbus.method('Action', [29], function(err) {
+  omxs.active.method('Action', [29], function(err) {
     return typeof cb === 'function' ? cb(err) : {};
   });
 };
 module.exports.getSource = function(cb) { //checked
-  omx_dbus.propertyRead('GetSource', function(err, vol) {
+  omxs.active.propertyRead('GetSource', function(err, vol) {
     cb(err, vol);
   });
 };
 module.exports.getMinRate = function(cb) { //checked
-  omx_dbus.propertyRead('MinimumRate', function(err, vol) {
+  omxs.active.propertyRead('MinimumRate', function(err, vol) {
     cb(err, vol);
   });
 };
 module.exports.getMaxRate = function(cb) { //checked
-  omx_dbus.propertyRead('MaximumRate', function(err, vol) {
+  omxs.active.propertyRead('MaximumRate', function(err, vol) {
     cb(err, vol);
   });
 };
 module.exports.reduceRate = function(cb) { //checked
-  omx_dbus.method('Action', [1], function(err) {
+  omxs.active.method('Action', [1], function(err) {
     return typeof cb === 'function' ? cb(err) : {};
   });
 };
 module.exports.increaceRate = function(cb) { //checked
-  omx_dbus.method('Action', [2], function(err) {
+  omxs.active.method('Action', [2], function(err) {
     return typeof cb === 'function' ? cb(err) : {};
   });
 };
@@ -249,22 +296,22 @@ module.exports.increaceRate = function(cb) { //checked
 
 //=========================Not working functions
 // module.exports.quit = function(cb) { //not working
-//     omx_dbus.method('Quit', function(err) {
+//     omxs.active.method('Quit', function(err) {
 //         return typeof cb === 'function' ? cb(err) : {};
 //     });
 // };
 // module.exports.mute = function(cb) { //not working
-//     omx_dbus.method('Mute', function(err) {
+//     omxs.active.method('Mute', function(err) {
 //         cb(err);
 //     });
 // };
 // module.exports.getRate = function(cb) { //not working
-//     omx_dbus.propertyRead('Rate', function(err, vol) {
+//     omxs.active.propertyRead('Rate', function(err, vol) {
 //         cb(err, vol);
 //     });
 // };
 // module.exports.play = function(cb) { //not working
-//     omx_dbus.method('Play', function(err) {
+//     omxs.active.method('Play', function(err) {
 //         return typeof cb === 'function' ? cb(err) : {};
 //     });
 // };
