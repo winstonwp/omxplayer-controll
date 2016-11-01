@@ -9,6 +9,7 @@ var opts = {
   'disableGhostbox': true,
   'subtitlePath': '',
   'startAt': 0,
+  'nativeLoop': true,
   'startVolume': 0.8,
   'closeOtherPlayers': true //Should close other players if necessary
 };
@@ -21,7 +22,7 @@ omxp.on('aboutToFinish', function() {
   console.log('========= About To Finish ==========');
 });
 omxp.on('finish', function() {
-  console.log('============= Finished =============');
   omxp.open('/home/pi/test1.mp4', opts);
+  console.log('============= Finished =============');
 });
 omxp.open('/home/pi/test1.mp4', opts);
