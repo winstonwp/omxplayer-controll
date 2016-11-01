@@ -171,6 +171,11 @@ module.exports.getVolume = function(cb) { //checked
         cb(err, vol);
     });
 };
+module.exports.getVolume = function(cb) { //checked
+  omxs.active.propertyRead('Volume', function(err, vol) {
+    cb(err, vol);
+  });
+};
 module.exports.setVolume = function(vol, cb) { //checked *not oficially but Working
   if (vol <= 1.0 && vol >= 0.0) {
     omxs.active.setVolume(vol, function(err, resp) {
