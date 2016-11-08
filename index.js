@@ -28,18 +28,19 @@ module.exports.open = function(path, options){
       omxs.active.openPlayer(path, options);
       omxs.active.on('changeStatus', function(status) {
         eventEmitter.emit('changeStatus', status);
-        var diff = status.duration - status.pos;
-        if (diff > 2000000 && diff < 7000000){
+        var diff = status.duration - status.pos,
+          lower = 5000000 - omxs.active.getTickInterval() * 500,
+          higer = 5000000 + omxs.active.getTickInterval() * 500;
+        if (diff > lower && diff < higer){
           eventEmitter.emit('aboutToFinish');
         }
       });
       omxs.active.on('finish', function() {
         eventEmitter.emit('finish');
-        if(setTransition){
+        if(typeof omxs.transitioning !== 'undefined')
           omxs.transitioning.method('SetAlpha', ['/not/used', 255], function() {});
-          delete omxs.active;
-          omxs.active = omxs.transitioning;
-        }
+        delete omxs.active;
+        omxs.active = omxs.transitioning;
       });
     }else{
       omxs.transitioning = new OmxDBus(omx_index);
@@ -48,8 +49,10 @@ module.exports.open = function(path, options){
       omxs.transitioning.method('SetAlpha', ['/not/used', 255/2], function() {});
       omxs.transitioning.on('changeStatus', function(status) {
         eventEmitter.emit('changeStatus', status);
-        var diff = status.duration - status.pos;
-        if (diff > 2000000 && diff < 7000000){
+        var diff = status.duration - status.pos,
+          lower = 5000000 - omxs.active.getTickInterval() * 500,
+          higer = 5000000 + omxs.active.getTickInterval() * 500;
+        if (diff > lower && diff < higer){
           eventEmitter.emit('aboutToFinish');
         }
       });
@@ -67,6 +70,19 @@ module.exports.open = function(path, options){
       omxs.active = new OmxDBus(omx_index);
     }
     omxs.active.openPlayer(path, options);
+    omxs.active.on('changeStatus', function(status) {
+      eventEmitter.emit('changeStatus', status);
+      var diff = status.duration - status.pos,
+        lower = 5000000 - omxs.active.getTickInterval() * 500,
+        higer = 5000000 + omxs.active.getTickInterval() * 500;
+      if (diff > lower && diff < higer){
+        eventEmitter.emit('aboutToFinish');
+      }
+    });
+    omxs.active.on('finish', function() {
+      eventEmitter.emit('finish');
+    });
+
   }
 };
 module.exports.playPause = function(cb) { //checked
@@ -85,17 +101,23 @@ module.exports.getStatus = function(cb) { //checked
   });
 };
 module.exports.getDuration = function(cb) { //checked
-  omxs.active.propertyRead('Duration', function(err, status) {
-    cb(err, status);
+  omxs.active.propertyRead('Duration', function(err, dur) {
+    cb(err, dur);
   });
 };
 module.exports.getPosition = function(cb) { //checked
-  omxs.active.propertyRead('Position', function(err, pos) {
-    cb(err, Math.round(pos / 10000));
+  omxs.active.propertyRead('Duration', function(err, dur) {
+    omxs.active.propertyRead('Position', function(err, pos) {
+      var ppos = 0;
+      if (pos < dur){
+        ppos = pos;
+      }
+      cb(err, Math.round(ppos));
+    });
   });
 };
 module.exports.setPosition = function(pos, cb) { //checked
-  pos = pos * 10000;
+  pos = pos;
   omxs.active.method('SetPosition', ['/not/used', pos], function(err) {
     return typeof cb === 'function' ? cb(err) : {};
   });
