@@ -37,16 +37,13 @@ module.exports.open = function(path, options){
       });
       omxs.active.on('finish', function() {
         eventEmitter.emit('finish');
-        if(typeof omxs.transitioning !== 'undefined')
-          omxs.transitioning.method('SetAlpha', ['/not/used', 255], function() {});
         delete omxs.active;
         omxs.active = omxs.transitioning;
+        delete omxs.transitioning;
       });
     }else{
       omxs.transitioning = new OmxDBus(omx_index);
       omxs.transitioning.openPlayer(path, options);
-      omxs.active.method('SetAlpha', ['/not/used', 255/2], function() {});
-      omxs.transitioning.method('SetAlpha', ['/not/used', 255/2], function() {});
       omxs.transitioning.on('changeStatus', function(status) {
         eventEmitter.emit('changeStatus', status);
         var diff = status.duration - status.pos,
@@ -58,11 +55,9 @@ module.exports.open = function(path, options){
       });
       omxs.transitioning.on('finish', function() {
         eventEmitter.emit('finish');
-        if(setTransition){
-          omxs.transitioning.method('SetAlpha', ['/not/used', 255], function() {});
-          delete omxs.active;
-          omxs.active = omxs.transitioning;
-        }
+        delete omxs.active;
+        omxs.active = omxs.transitioning;
+        delete omxs.transitioning;
       });
     }
   } else {
@@ -117,7 +112,6 @@ module.exports.getPosition = function(cb) { //checked
   });
 };
 module.exports.setPosition = function(pos, cb) { //checked
-  pos = pos;
   omxs.active.method('SetPosition', ['/not/used', pos], function(err) {
     return typeof cb === 'function' ? cb(err) : {};
   });
