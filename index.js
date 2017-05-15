@@ -2,11 +2,11 @@ var events = require('events');
 
 var eventEmitter = new events.EventEmitter();
 var OmxDBus = require('./lib/omxp_dbus');
-var omx_index = 30;
+var omx_index=30;
 var setTransition = false;
 var omxs = {
-  active: undefined,
-  transitioning: undefined
+  active:undefined,
+  transitioning:undefined
 };
 /**
  * Open OmxPlayer, with the given parameter
