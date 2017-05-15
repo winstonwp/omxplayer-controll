@@ -91,14 +91,9 @@ module.exports.pause = function(cb) { //checked IDEM playPause
   });
 };
 module.exports.stop = function(cb) { //checked IDEM Stop
-    omx_dbus.method('Stop', function(err) {
-        return typeof cb === 'function' ? cb(err) : {};
-    });
-};
-module.exports.stop = function(cb) { //checked IDEM Stop
-    omx_dbus.method('Stop', function(err) {
-        return typeof cb === 'function' ? cb(err) : {};
-    });
+  omx_dbus.method('Stop', function(err) {
+      return typeof cb === 'function' ? cb(err) : {};
+  });
 };
 module.exports.getStatus = function(cb) { //checked
   omxs.active.propertyRead('PlaybackStatus', function(err, status) {
@@ -146,29 +141,9 @@ module.exports.nextAudio = function(cb) { //checked
         return typeof cb === 'function' ? cb(err) : {};
     });
 };
-module.exports.listAudio = function(cb) { //checked
-    omx_dbus.method('ListAudio', function(err, audioStreams) {
-        cb(err, audioStreams);
-    });
-};
-module.exports.selectAudio = function(audioStreamId, cb) { //checked
-    omx_dbus.method('SelectAudio', [audioStreamId], function(err) {
-        return typeof cb === 'function' ? cb(err) : {};
-    });
-};
-module.exports.nextAudio = function(cb) { //checked
-    omx_dbus.method('Action', [7], function(err) {
-        return typeof cb === 'function' ? cb(err) : {};
-    });
-};
 module.exports.previousAudio = function(cb) { //checked
     omx_dbus.method('Action', [6], function(err) {
         return typeof cb === 'function' ? cb(err) : {};
-    });
-};
-module.exports.getVolume = function(cb) { //checked
-    omx_dbus.propertyRead('Volume', function(err, vol) {
-        cb(err, vol);
     });
 };
 module.exports.getVolume = function(cb) { //checked
@@ -200,11 +175,6 @@ module.exports.listSubtitles = function(cb) { //checked
         cb(err, subtitleStreams);
     });
 };
-module.exports.listSubtitles = function(cb) { //checked
-    omx_dbus.method('ListSubtitles', function(err, subtitleStreams) {
-        cb(err, subtitleStreams);
-    });
-};
 module.exports.toggleSubtitles = function(cb) { //checked not tested (I have no subtitles)
   omxs.active.method('Action', [12], function(err) {
     return typeof cb === 'function' ? cb(err) : {};
@@ -215,18 +185,6 @@ module.exports.nextSubtitle = function(cb) { //checked
         return typeof cb === 'function' ? cb(err) : {};
     });
 };
-module.exports.nextSubtitle = function(cb) { //checked
-    omx_dbus.method('Action', [11], function(err) {
-        return typeof cb === 'function' ? cb(err) : {};
-    });
-};
-module.exports.previousSubtitle = function(cb) { //checked
-    omx_dbus.method('Action', [10], function(err) {
-        return typeof cb === 'function' ? cb(err) : {};
-    });
-};
-module.exports.hideSubtitles = function(cb) { //checked not tested (I have no subtitles)
-    omx_dbus.method('Action', [30], function(err) {
 module.exports.previousSubtitle = function(cb) { //checked
     omx_dbus.method('Action', [10], function(err) {
         return typeof cb === 'function' ? cb(err) : {};
