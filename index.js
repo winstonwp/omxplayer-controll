@@ -2,11 +2,11 @@ var events = require('events');
 
 var eventEmitter = new events.EventEmitter();
 var OmxDBus = require('./lib/omxp_dbus');
-var omx_index=30;
+var omx_index = 30;
 var setTransition = false;
 var omxs = {
-  active:undefined,
-  transitioning:undefined
+  active: undefined,
+  transitioning: undefined
 };
 /**
  * Open OmxPlayer, with the given parameter
@@ -15,15 +15,15 @@ var omxs = {
  * @options {Object} The options available
  */
 module.exports = eventEmitter;
-module.exports.setTransition = function(setT){
+module.exports.setTransition = function(setT) {
   setTransition = setT;
 };
-module.exports.open = function(path, options){
+module.exports.open = function(path, options) {
   // omx_index++;
   omx_index = omx_index < 20 ? 30 : omx_index - 1;
-  if(setTransition){
+  if (setTransition) {
     options.layer = omx_index;
-    if(typeof omxs.active === 'undefined'){
+    if (typeof omxs.active === 'undefined') {
       omxs.active = new OmxDBus(omx_index);
       omxs.active.openPlayer(path, options);
       omxs.active.on('changeStatus', function(status) {
@@ -31,7 +31,7 @@ module.exports.open = function(path, options){
         var diff = status.duration - status.pos,
           lower = 5000000 - omxs.active.getTickInterval() * 500,
           higer = 5000000 + omxs.active.getTickInterval() * 500;
-        if (diff > lower && diff < higer){
+        if (diff > lower && diff < higer) {
           eventEmitter.emit('aboutToFinish');
         }
       });
@@ -41,7 +41,7 @@ module.exports.open = function(path, options){
         omxs.active = omxs.transitioning;
         delete omxs.transitioning;
       });
-    }else{
+    } else {
       omxs.transitioning = new OmxDBus(omx_index);
       omxs.transitioning.openPlayer(path, options);
       omxs.transitioning.on('changeStatus', function(status) {
@@ -49,7 +49,7 @@ module.exports.open = function(path, options){
         var diff = status.duration - status.pos,
           lower = 5000000 - omxs.active.getTickInterval() * 500,
           higer = 5000000 + omxs.active.getTickInterval() * 500;
-        if (diff > lower && diff < higer){
+        if (diff > lower && diff < higer) {
           eventEmitter.emit('aboutToFinish');
         }
       });
@@ -61,7 +61,7 @@ module.exports.open = function(path, options){
       });
     }
   } else {
-    if(typeof omxs.active === 'undefined'){
+    if (typeof omxs.active === 'undefined') {
       omxs.active = new OmxDBus(omx_index);
     }
     omxs.active.openPlayer(path, options);
@@ -70,7 +70,7 @@ module.exports.open = function(path, options){
       var diff = status.duration - status.pos,
         lower = 5000000 - omxs.active.getTickInterval() * 500,
         higer = 5000000 + omxs.active.getTickInterval() * 500;
-      if (diff > lower && diff < higer){
+      if (diff > lower && diff < higer) {
         eventEmitter.emit('aboutToFinish');
       }
     });
@@ -91,14 +91,9 @@ module.exports.pause = function(cb) { //checked IDEM playPause
   });
 };
 module.exports.stop = function(cb) { //checked IDEM Stop
-  omx_dbus.method('Stop', function(err) {
-      return typeof cb === 'function' ? cb(err) : {};
+  omxs.active.method('Stop', function(err) {
+    return typeof cb === 'function' ? cb(err) : {};
   });
-};
-module.exports.stop = function(cb) { //checked IDEM Stop
-    omx_dbus.method('Stop', function(err) {
-        return typeof cb === 'function' ? cb(err) : {};
-    });
 };
 module.exports.getStatus = function(cb) { //checked
   omxs.active.propertyRead('PlaybackStatus', function(err, status) {
@@ -114,7 +109,7 @@ module.exports.getPosition = function(cb) { //checked
   omxs.active.propertyRead('Duration', function(err, dur) {
     omxs.active.propertyRead('Position', function(err, pos) {
       var ppos = 0;
-      if (pos < dur){
+      if (pos < dur) {
         ppos = pos;
       }
       cb(err, Math.round(ppos));
@@ -131,45 +126,25 @@ module.exports.seek = function(offset, cb) { //checked
     return typeof cb === 'function' ? cb(err) : {};
   });
 };
-module.exports.listAudio = function(cb) { //checked
-    omx_dbus.method('ListAudio', function(err, audioStreams) {
-        cb(err, audioStreams);
-    });
-};
 module.exports.selectAudio = function(audioStreamId, cb) { //checked
-    omx_dbus.method('SelectAudio', [audioStreamId], function(err) {
-        return typeof cb === 'function' ? cb(err) : {};
-    });
+  omxs.active.method('SelectAudio', [audioStreamId], function(err) {
+    return typeof cb === 'function' ? cb(err) : {};
+  });
 };
 module.exports.nextAudio = function(cb) { //checked
-    omx_dbus.method('Action', [7], function(err) {
-        return typeof cb === 'function' ? cb(err) : {};
-    });
+  omxs.active.method('Action', [7], function(err) {
+    return typeof cb === 'function' ? cb(err) : {};
+  });
 };
 module.exports.listAudio = function(cb) { //checked
-    omx_dbus.method('ListAudio', function(err, audioStreams) {
-        cb(err, audioStreams);
-    });
-};
-module.exports.selectAudio = function(audioStreamId, cb) { //checked
-    omx_dbus.method('SelectAudio', [audioStreamId], function(err) {
-        return typeof cb === 'function' ? cb(err) : {};
-    });
-};
-module.exports.nextAudio = function(cb) { //checked
-    omx_dbus.method('Action', [7], function(err) {
-        return typeof cb === 'function' ? cb(err) : {};
-    });
+  omxs.active.method('ListAudio', function(err, audioStreams) {
+    cb(err, audioStreams);
+  });
 };
 module.exports.previousAudio = function(cb) { //checked
-    omx_dbus.method('Action', [6], function(err) {
-        return typeof cb === 'function' ? cb(err) : {};
-    });
-};
-module.exports.getVolume = function(cb) { //checked
-    omx_dbus.propertyRead('Volume', function(err, vol) {
-        cb(err, vol);
-    });
+  omxs.active.method('Action', [6], function(err) {
+    return typeof cb === 'function' ? cb(err) : {};
+  });
 };
 module.exports.getVolume = function(cb) { //checked
   omxs.active.propertyRead('Volume', function(err, vol) {
@@ -196,14 +171,9 @@ module.exports.volumeDown = function(cb) { //checked
   });
 };
 module.exports.listSubtitles = function(cb) { //checked
-    omx_dbus.method('ListSubtitles', function(err, subtitleStreams) {
-        cb(err, subtitleStreams);
-    });
-};
-module.exports.listSubtitles = function(cb) { //checked
-    omx_dbus.method('ListSubtitles', function(err, subtitleStreams) {
-        cb(err, subtitleStreams);
-    });
+  omxs.active.method('ListSubtitles', function(err, subtitleStreams) {
+    cb(err, subtitleStreams);
+  });
 };
 module.exports.toggleSubtitles = function(cb) { //checked not tested (I have no subtitles)
   omxs.active.method('Action', [12], function(err) {
@@ -211,26 +181,19 @@ module.exports.toggleSubtitles = function(cb) { //checked not tested (I have no 
   });
 };
 module.exports.nextSubtitle = function(cb) { //checked
-    omx_dbus.method('Action', [11], function(err) {
-        return typeof cb === 'function' ? cb(err) : {};
-    });
-};
-module.exports.nextSubtitle = function(cb) { //checked
-    omx_dbus.method('Action', [11], function(err) {
-        return typeof cb === 'function' ? cb(err) : {};
-    });
+  omxs.active.method('Action', [11], function(err) {
+    return typeof cb === 'function' ? cb(err) : {};
+  });
 };
 module.exports.previousSubtitle = function(cb) { //checked
-    omx_dbus.method('Action', [10], function(err) {
-        return typeof cb === 'function' ? cb(err) : {};
-    });
+  omxs.active.method('Action', [10], function(err) {
+    return typeof cb === 'function' ? cb(err) : {};
+  });
 };
 module.exports.hideSubtitles = function(cb) { //checked not tested (I have no subtitles)
-    omx_dbus.method('Action', [30], function(err) {
-module.exports.previousSubtitle = function(cb) { //checked
-    omx_dbus.method('Action', [10], function(err) {
-        return typeof cb === 'function' ? cb(err) : {};
-    });
+  omxs.active.method('Action', [30], function(err) {
+    return typeof cb === 'function' ? cb(err) : {};
+  });
 };
 module.exports.hideSubtitles = function(cb) { //checked not tested (I have no subtitles)
   omxs.active.method('Action', [30], function(err) {
