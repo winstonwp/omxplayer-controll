@@ -162,8 +162,6 @@ module.exports.previousSubtitle = function(cb) { //checked
         return typeof cb === 'function' ? cb(err) : {};
     });
 };
-module.exports.hideSubtitles = function(cb) { //checked not tested (I have no subtitles)
-    omx_dbus.method('Action', [30], function(err) {
 module.exports.previousSubtitle = function(cb) { //checked
     omx_dbus.method('Action', [10], function(err) {
         return typeof cb === 'function' ? cb(err) : {};
